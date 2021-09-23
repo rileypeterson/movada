@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  db:
+    container_name: mysql
+    image: mysql
+    volumes:
+      #      - /Volumes/data:/var/lib/mysql  # /path/to/your/external/volume:/var/lib/mysql
+      - /var/lib/mysql/.Spotlight-V100
+      - /var/lib/mysql/.Trashes
+    #      - .:/docker-entrypoint-initdb.d/:ro
+    restart: always
+    environment:
+      - MYSQL_DATABASE=sports
+      - MYSQL_ROOT_PASSWORD=password
+    cap_add:
+      - SYS_NICE
+    healthcheck:
+      # So that web can check that db is healthy before running
+      test: "exit 0"
+    ports:
+      - "3306:3306"
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        # So that web waits until db is healthy
+        condition: service_healthy
