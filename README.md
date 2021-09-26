@@ -12,3 +12,19 @@ TODO
 # Goal
 * My goal is to use past performance between two teams to predict the expected return of an O/U or spread bet in an upcoming match up.
 * Said differently, we want a function `P` which takes features from previous games of team 1 `X1(n-1, n-2, ...)` and team 2 `X2(n-1, n-2, ...)` and predicts the probability of a specific outcome, e.g.: `P(s1=34, s2=30 | X1(n-1, n-2, ...) & X2(n-1, n-2, ...)) = 0.07`
+
+# Setup
+1. Start mysql and django:
+    ```
+    cd database/mysql
+    docker-compose up
+    ```
+2. Enter active container (either mysql or django/web):
+    ```
+    docker exec -it <container_name> /bin/bash
+    ```
+3. Run scraper (on host):
+```
+cd src/espn/espn
+scrapy crawl nfl
+```

@@ -2,20 +2,11 @@
 Scrape available nfl stats from ESPN
 """
 import scrapy
-import pandas as pd
+
+# import pandas as pd
 from collections import defaultdict
 from scrapy.exceptions import CloseSpider
-
-
-def pp(d, td):
-    col_name = td.css("::attr(class)").extract()[0]
-    if col_name == "name":
-        d["name"] += td.css("* > span")[0].css("::text").extract()[0]
-        d["abbr"] += td.css("* > span")[1].css("::text").extract()[0]
-    else:
-        col_value = td.css(f'[class="{col_name}"]::text').extract()[0]
-        d[col_name] = col_value
-    return d
+from sports_app.models import Player
 
 
 class NFLSpider(scrapy.Spider):
@@ -83,5 +74,5 @@ class NFLSpider(scrapy.Spider):
                 else:
                     col_value = td.css(f'[class="{col_name}"]::text').extract()
                     d[col_name] += col_value
-            print(pd.DataFrame(d))
+            # pprint.pprint(d)
         raise CloseSpider("bandwidth_exceeded")
