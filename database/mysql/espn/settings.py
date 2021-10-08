@@ -54,9 +54,9 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-# SPIDER_MIDDLEWARES = {
-#    'espn.middlewares.EspnSpiderMiddleware': 543,
-# }
+SPIDER_MIDDLEWARES = {
+    "espn.middlewares.EspnSpiderMiddleware": 543,
+}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
@@ -66,9 +66,10 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
-# EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-# }
+CLOSESPIDER_ERRORCOUNT = 1
+EXTENSIONS = {
+    "scrapy.extensions.closespider.CloseSpider": 500,
+}
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html

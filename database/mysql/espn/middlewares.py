@@ -8,7 +8,7 @@ from scrapy.http import Response, HtmlResponse
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from sports_app.models import Webpage
+from sports_app.models import Webpage, Sport, League
 
 
 # useful for handling different item types with a single interface
@@ -66,6 +66,8 @@ class EspnSpiderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)
+        s, _ = Sport.objects.update_or_create(name="football")
+        l, _ = League.objects.update_or_create(sport_id=s.id, name="nfl")
 
 
 class EspnDownloaderMiddleware:
