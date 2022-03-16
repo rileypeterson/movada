@@ -6,9 +6,9 @@
 from scrapy import signals
 from scrapy.http import Response, HtmlResponse
 
-from django.core.exceptions import ObjectDoesNotExist
-
-from sports_app.models import Webpage, Sport, League
+# from django.core.exceptions import ObjectDoesNotExist
+#
+# from sports_app.models import Webpage, Sport, League
 
 
 # useful for handling different item types with a single interface

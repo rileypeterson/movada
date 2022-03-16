@@ -1,9 +1,9 @@
 # Django setup
-import django
+# import django
 import os
 
-os.environ["DJANGO_SETTINGS_MODULE"] = "sports.settings"
-django.setup()
+# os.environ["DJANGO_SETTINGS_MODULE"] = "sports.settings"
+# django.setup()
 
 # Scrapy settings for espn project
 #
@@ -54,15 +54,15 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-SPIDER_MIDDLEWARES = {
-    "espn.middlewares.EspnSpiderMiddleware": 543,
-}
+# SPIDER_MIDDLEWARES = {
+#     "espn.middlewares.EspnSpiderMiddleware": 543,
+# }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-DOWNLOADER_MIDDLEWARES = {
-    "espn.middlewares.EspnDownloaderMiddleware": 543,
-}
+# DOWNLOADER_MIDDLEWARES = {
+#     "espn.middlewares.EspnDownloaderMiddleware": 543,
+# }
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -99,3 +99,11 @@ EXTENSIONS = {
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 DUPEFILTER_CLASS = "scrapy.dupefilters.BaseDupeFilter"
+
+
+DOWNLOAD_HANDLERS = {
+    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+}
+
+TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"

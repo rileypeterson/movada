@@ -32,6 +32,10 @@ class Team(models.Model):
         db_table = "team"
 
     # Tennessee Titans, Manchester United, Memphis Grizzlies, Cleveland Indians
+    abbrev = models.CharField(max_length=50)
+    full_name = models.CharField(max_length=50)
+    # Really "location"
+    city = models.CharField(max_length=50)
     name = models.CharField(max_length=50)
 
 
@@ -40,13 +44,6 @@ class Player(models.Model):
         db_table = "player"
 
     name = models.CharField(max_length=50)
-
-
-class GameType(models.Model):
-    class Meta:
-        db_table = "game_type"
-
-    name = models.CharField(max_length=30)
 
 
 class Venue(models.Model):
@@ -64,61 +61,20 @@ class Game(models.Model):
     # Football game, baseball game, soccer game
     team1 = models.ForeignKey(Team, related_name="team1", on_delete=models.CASCADE)
     team2 = models.ForeignKey(Team, related_name="team2", on_delete=models.CASCADE)
-    game_type = models.ForeignKey(GameType, on_delete=models.CASCADE)
+    game_type = models.CharField(max_length=30)
     datetime = models.DateTimeField()
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
 
 
-class StatSubCategory(models.Model):
+class NflPlay(models.Model):
     class Meta:
-        db_table = "stat_sub_category"
+        db_table = "nfl_play"
 
-    # Passing, Rushing, Receiving, etc.
-    sub_category = models.CharField(max_length=30)
-
-
-class StatCategory(models.Model):
-    class Meta:
-        db_table = "stat_category"
-
-    # Offensive, Defensive, Special Teams, etc.
-    category = models.CharField(max_length=30)
-
-
-class PlayerGameStatType(models.Model):
-    class Meta:
-        db_table = "player_game_stat_type"
-
-    full_name = models.CharField(max_length=50)
-    stat = models.CharField(max_length=10)  # Abbreviation of stat name
-    category = models.ForeignKey(StatCategory, on_delete=models.CASCADE)
-    sub_category = models.ForeignKey(StatSubCategory, on_delete=models.CASCADE)
-
-
-class PlayerGameStat(models.Model):
-    class Meta:
-        db_table = "player_game_stat"
-
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
-    type = models.ForeignKey(PlayerGameStatType, on_delete=models.CASCADE)
-    value = models.FloatField()
-
-
-class TeamGameStatType(models.Model):
-    class Meta:
-        db_table = "team_game_stat_type"
-
-    full_name = models.CharField(max_length=50)
-    stat = models.CharField(max_length=10)  # Abbreviation of stat name
-    category = models.ForeignKey(StatCategory, on_delete=models.CASCADE)
-    sub_category = models.ForeignKey(StatSubCategory, on_delete=models.CASCADE)
-
-
-class TeamGameStat(models.Model):
-    class Meta:
-        db_table = "team_game_stat"
-
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    type = models.ForeignKey(TeamGameStatType, on_delete=models.CASCADE)
-    value = models.FloatField()
+    game_id = models.ForeignKey(Game, on_delete=models.CASCADE)
+    offensive_team_id = models.ForeignKey(
+        Team, related_name="offensive_team", on_delete=models.CASCADE
+    )
+    defensive_team_id = models.ForeignKey(
+        Team, related_name="defensive_team", on_delete=models.CASCADE
+    )
+    description = models.TextField()

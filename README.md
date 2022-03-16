@@ -21,7 +21,7 @@ TODO
     ```
 2. Enter active container (either mysql or django/web):
     ```
-    docker exec -it <container_name> /bin/bash
+    docker exec -it `docker ps | awk 'FNR == 2 {print $1}'` /bin/bash
     ```
 3. Make migrations:
     ```
@@ -30,7 +30,7 @@ TODO
     ```
 4. Run scraper:
     ```
-    cd src/espn/espn
+    cd espn
     scrapy crawl nfl
     ```
 5. Sample query:
@@ -44,5 +44,18 @@ TODO
    Gives:
    ![image](https://user-images.githubusercontent.com/29719483/136532863-d655e02b-95de-475a-8600-80ef361c0c24.png)
 
+# Other nice commands
+```
+# Nuke db
+python manage.py reset_db
+# Truncate db
+python manage.py flush
+# Stop containers
+docker-compose down
+
+# When using inspect_response you can do this to use self essentially
+home_team_obj, away_team_obj = spider.parse_teams(response)
+
+```
 
 # Thoughts
