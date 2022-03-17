@@ -135,7 +135,7 @@ class NcaabbSpider(scrapy.Spider):
         bovada_df["bottom_final"] = np.nan
         bovada_df = org_df(bovada_df)
         # TODO: Use relative path here
-        master_df = pd.read_pickle("/Users/riley/Documents/movada/sbro/master.df")
+        master_df = pd.read_pickle("/sbro/master.df")
         # Let's join these here
         final_cols = list(master_df.columns)
         self.df = pd.concat(
