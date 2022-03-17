@@ -58,9 +58,15 @@ home_team_obj, away_team_obj = spider.parse_teams(response)
 
 ```
 
+### Websites
+* https://www.oddsportal.com/basketball/usa/ncaa-2016-2017/ohio-bobcats-kent-state-GE3ZgmWp/#ah;1
+* https://www.sportsbookreview.com/betting-odds/ncaa-basketball/matchups/?date=20170310
+* https://www.sportsbookreviewsonline.com/scoresoddsarchives/ncaabasketball/ncaabasketballoddsarchives.htm
+
+
 # Thoughts
 1. Github action (which runs every hour) initiates movada pipeline
 2. Goes to bovada and consumes all the upcoming fixtures (including lines and spreads).
-3. For each team get the data from their previous 7 non-preseason games. 
+3. For each team get the data from their previous 7 non-preseason games (recurse) including historical odds. 
 4. Also get the odds data from [here](https://github.com/JeMorriso/PySBR).
 5. Post to dataframe in repo on github. 
