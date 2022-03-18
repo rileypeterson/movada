@@ -39,3 +39,24 @@ jobs:
           export PYTHONPATH=$PYTHONPATH:`pwd`
           cd ncaab
           scrapy crawl bovada
+
+      - name: Check envs
+        run: |
+          echo $GITHUB_BASE_REF
+          pwd
+          echo $GITHUB_ACTION
+          echo $GITHUB_REF_NAME
+          echo $GITHUB_WORKFLOW
+          echo $GITHUB_ACTION_PATH
+
+      # Add new files in data folder, commit along with other modified files, push
+      - name: Commit files
+        run: |
+          git config --local user.name github-actions
+          git config --local user.email "actions@github.com"
+          git add ncaab/data/*
+          git commit -am "GH ACTION scrape $(date)"
+          git push origin ncaab
+        env:
+          REPO_KEY: ${{secrets.GITHUB_TOKEN}}
+          username: github-actions
