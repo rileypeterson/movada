@@ -5,3 +5,4 @@ __pycache__
 *.DS_Store
 /ncaab/data/sbro/ncaa *
 /venv
+.pytest_cache
