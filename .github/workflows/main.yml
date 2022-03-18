@@ -43,6 +43,12 @@ jobs:
           cd ncaab
           scrapy crawl bovada
 
+      - name: Run the bovada merger
+        run: |
+          export PYTHONPATH=$PYTHONPATH:`pwd`
+          cd ncaab
+          python scripts/bovada_merge.py
+
       # Add new files in data folder, commit along with other modified files, push
       - name: Commit files
         run: |
