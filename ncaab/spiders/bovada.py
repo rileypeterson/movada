@@ -141,7 +141,6 @@ class BovadaSpider(scrapy.Spider):
             "bottom_total_odds",
         ]
         bovada_df = bovada_df[cols]
-        a = 1
         output_file = os.path.dirname(__file__)
         output_file = os.path.dirname(output_file)
         output_file = os.path.join(output_file, "data", "bovada", "next_events.csv")
