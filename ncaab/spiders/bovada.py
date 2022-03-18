@@ -1,8 +1,8 @@
+import os
 import pandas as pd
 import numpy as np
 import scrapy
 from scrapy_playwright.page import PageCoroutine
-from thefuzz import process
 
 
 def org_df(df):
@@ -24,8 +24,8 @@ def org_df(df):
     return df
 
 
-class NcaabbSpider(scrapy.Spider):
-    name = "ncaabb"
+class BovadaSpider(scrapy.Spider):
+    name = "bovada"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -33,7 +33,6 @@ class NcaabbSpider(scrapy.Spider):
         self.schools = None
 
     def start_requests(self):
-        # GET request
         start_url = "https://www.bovada.lv/sports/basketball/college-basketball"
         wait_for_first_coupon_box = PageCoroutine(
             "wait_for_selector",
@@ -119,42 +118,31 @@ class NcaabbSpider(scrapy.Spider):
         bovada_df = pd.DataFrame(data=bovada_list, columns=bovada_list[0].keys())
         return bovada_df
 
-    def parse_teams(self, response):
-        prefix = "/cbb/schools/"
-        self.schools = [
-            s.replace(prefix, "")[:-1]
-            for s in response.css("td > a::attr(href)").getall()
-        ]
-        a = 1
-
-        yield response.css("a").getall()
-
     def parse(self, response):
         bovada_df = self.parse_bovada(response)
         bovada_df["top_final"] = np.nan
         bovada_df["bottom_final"] = np.nan
         bovada_df = org_df(bovada_df)
-        # TODO: Use relative path here
-        master_df = pd.read_pickle("/sbro/master.df")
-        # Let's join these here
-        final_cols = list(master_df.columns)
-        self.df = pd.concat(
-            [
-                bovada_df[final_cols],
-                master_df.sort_values(by="game_date", ascending=False),
-            ],
-            axis=0,
-        )
-        url = "https://www.sports-reference.com/cbb/schools/"
-        yield scrapy.Request(url, callback=self.parse_teams)
-        # b = self.fetch_teams()
-        #
-        # "https://www.sports-reference.com/cbb/schools/iowa-state/2016-gamelogs.html"
-        # a = 1
-        # yield {"url": response.url}
-
-
-#
-# "body > bx-site > ng-component > div > sp-sports-ui > div > main > div > section > main > sp-path-event > div > sp-next-events > div > div"
-# "/html/body/bx-site/ng-component/div/sp-sports-ui/div/main/div/section/main/sp-path-event/div/sp-next-events/div/div"
-# "/html/body/bx-site/ng-component/div/sp-sports-ui/div/main/div/section/main/sp-path-event/div/sp-next-events/div/div/div[2]/div/sp-coupon[1]"
+        cols = [
+            "game_date",
+            "top_team",
+            "top_final",
+            "bottom_final",
+            "bottom_team",
+            "top_spread",
+            "top_spread_odds",
+            "top_ml_odds",
+            "top_total",
+            "top_total_odds",
+            "bottom_spread",
+            "bottom_spread_odds",
+            "bottom_ml_odds",
+            "bottom_total",
+            "bottom_total_odds",
+        ]
+        bovada_df = bovada_df[cols]
+        a = 1
+        output_file = os.path.dirname(__file__)
+        output_file = os.path.dirname(output_file)
+        output_file = os.path.join(output_file, "data", "bovada", "next_events.csv")
+        bovada_df.to_csv(output_file)
