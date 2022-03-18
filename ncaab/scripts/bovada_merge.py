@@ -45,6 +45,10 @@ if __name__ == "__main__":
     df["game_datetime"] = df["game_datetime"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["scrape_datetime"] = df["scrape_datetime"].dt.strftime("%Y-%m-%d %H:%M:%S")
 
+    # Safety check so I don't accidentally upload something too large
+    if len(df) >= 10000:
+        raise ValueError("DataFrame too large!!")
+
     # All dtypes are object, write output to last_events.csv
     output_file = os.path.dirname(__file__)
     output_file = os.path.dirname(output_file)
