@@ -10,4 +10,6 @@ def sanitize_team(team):
     return team
 
 
-a = 1
+def sanitize_odds(odds):
+    team = re.sub("[^0-9a-zA-Z,-.+']+", "", odds)
+    return team

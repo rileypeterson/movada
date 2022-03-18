@@ -1,9 +1,12 @@
 import os
+import time
+import traceback
 import pandas as pd
 import numpy as np
 import scrapy
 from scrapy_playwright.page import PageCoroutine
-from ncaab.utils.team_names import sanitize_team
+from ncaab.utils.str_sanitizer import sanitize_team, sanitize_odds
+from ncaab.constants import BOVADA_COLUMNS
 
 
 def org_df(df):
@@ -57,10 +60,16 @@ class BovadaSpider(scrapy.Spider):
     @staticmethod
     def parse_game_box(game_box):
         # ONLY WORKS IF ML IS PRESENT
+
         # Game Date and Time
         game_date_elm = "span.period.hidden-xs"
         game_date = game_box.css(f"{game_date_elm}::text").getall()[0]
         game_time = game_box.css(f"{game_date_elm} > time.clock::text").getall()[0]
+        game_datetime = (
+            pd.to_datetime(game_date + game_time + time.strftime("%z"))
+            .tz_convert("UTC")
+            .strftime("%Y-%m-%d %H:%M:%S")
+        )
 
         # Team Names
         top_team, bottom_team = game_box.css(".competitor-name>.name::text").getall()
@@ -89,7 +98,13 @@ class BovadaSpider(scrapy.Spider):
             .extract()
         )
         top_total_odds, bottom_total_odds = total_col.css(".bet-price::text").extract()
+        if (
+            top_total_label.strip().upper() != "O"
+            or bottom_total_label.strip().upper() != "U"
+        ):
+            raise ValueError("Over under labels are wrong")
         d = dict(
+            game_datetime=game_datetime,
             game_date=game_date,
             game_time=game_time,
             top_team=top_team,
@@ -100,50 +115,47 @@ class BovadaSpider(scrapy.Spider):
             bottom_spread_odds=bottom_spread_odds,
             top_ml_odds=top_ml_odds,
             bottom_ml_odds=bottom_ml_odds,
-            top_total_label=top_total_label,
             top_total=top_total,
-            bottom_total_label=bottom_total_label,
             bottom_total=bottom_total,
             top_total_odds=top_total_odds,
             bottom_total_odds=bottom_total_odds,
         )
+        # Sanitize (-110) --> -110 etc.
+        for k, v in d.items():
+            if k not in {
+                "game_datetime",
+                "game_date",
+                "game_time",
+                "top_team",
+                "bottom_team",
+            }:
+                d[k] = sanitize_odds(v)
         return d
 
     def parse_bovada(self, response):
         game_boxes = response.css("sp-next-events").css("sp-coupon")
         bovada_list = []
+        scrape_datetime = pd.to_datetime("now", utc=True).round("s")
         for game_box in game_boxes:
             try:
                 bd = self.parse_game_box(game_box)
                 bovada_list.append(bd)
-            except ValueError:
-                pass
+            except (ValueError, IndexError):
+                # TODO: Make these better
+                # Value Error for when there is no ML or missing lines
+                # Index Error when the date says "Second Half"
+                traceback.print_exc()
         bovada_df = pd.DataFrame(data=bovada_list, columns=bovada_list[0].keys())
+        bovada_df["scrape_datetime"] = scrape_datetime.strftime("%Y-%m-%d %H:%M:%S")
         return bovada_df
 
     def parse(self, response):
         bovada_df = self.parse_bovada(response)
         bovada_df["top_final"] = np.nan
         bovada_df["bottom_final"] = np.nan
-        bovada_df = org_df(bovada_df)
-        cols = [
-            "game_date",
-            "top_team",
-            "top_final",
-            "bottom_final",
-            "bottom_team",
-            "top_spread",
-            "top_spread_odds",
-            "top_ml_odds",
-            "top_total",
-            "top_total_odds",
-            "bottom_spread",
-            "bottom_spread_odds",
-            "bottom_ml_odds",
-            "bottom_total",
-            "bottom_total_odds",
-        ]
-        bovada_df = bovada_df[cols]
+        # We don't want to do this here, later in the processing
+        # bovada_df = org_df(bovada_df)
+        bovada_df = bovada_df[BOVADA_COLUMNS]
         output_file = os.path.dirname(__file__)
         output_file = os.path.dirname(output_file)
         output_file = os.path.join(output_file, "data", "bovada", "next_events.csv")

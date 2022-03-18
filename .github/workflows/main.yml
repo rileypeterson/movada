@@ -4,8 +4,8 @@ name: scrape
 
 # Controls when the workflow will run
 on:
-#  schedule:
-#    - cron: '0 * * * *'
+  schedule:
+    - cron: '0 * * * *'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -25,6 +25,9 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: '3.8'
+      - uses: szenius/set-timezone@v1.0
+        with:
+          timezoneLinux: "America/Los_Angeles"
 
       # Runs a single command using the runners shell
       - name: Install packages
@@ -39,6 +42,12 @@ jobs:
           export PYTHONPATH=$PYTHONPATH:`pwd`
           cd ncaab
           scrapy crawl bovada
+
+      - name: Run the bovada merger
+        run: |
+          export PYTHONPATH=$PYTHONPATH:`pwd`
+          cd ncaab
+          python scripts/bovada_merge.py
 
       # Add new files in data folder, commit along with other modified files, push
       - name: Commit files
