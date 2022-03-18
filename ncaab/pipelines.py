@@ -8,6 +8,6 @@
 from itemadapter import ItemAdapter
 
 
-class EspnPipeline:
+class NcaabPipeline:
     def process_item(self, item, spider):
         return item

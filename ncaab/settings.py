@@ -1,11 +1,4 @@
-# Django setup
-# import django
-import os
-
-# os.environ["DJANGO_SETTINGS_MODULE"] = "sports.settings"
-# django.setup()
-
-# Scrapy settings for espn project
+# Scrapy settings for ncaab project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -14,23 +7,20 @@ import os
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "espn"
+BOT_NAME = "ncaab"
 
-SPIDER_MODULES = ["espn.spiders"]
-NEWSPIDER_MODULE = "espn.spiders"
+SPIDER_MODULES = ["ncaab.spiders"]
+NEWSPIDER_MODULE = "ncaab.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'espn (+http://www.yourdomain.com)'
+# USER_AGENT = 'ncaab (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 1
-# DEPTH_PRIORITY = 1
-# SCHEDULER_DISK_QUEUE = "scrapy.squeues.PickleFifoDiskQueue"
-# SCHEDULER_MEMORY_QUEUE = "scrapy.squeues.FifoMemoryQueue"
+# CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -55,26 +45,25 @@ ROBOTSTXT_OBEY = False
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#     "espn.middlewares.EspnSpiderMiddleware": 543,
+#    'ncaab.middlewares.NcaabSpiderMiddleware': 543,
 # }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 # DOWNLOADER_MIDDLEWARES = {
-#     "espn.middlewares.EspnDownloaderMiddleware": 543,
+#    'ncaab.middlewares.NcaabDownloaderMiddleware': 543,
 # }
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
-CLOSESPIDER_ERRORCOUNT = 1
-EXTENSIONS = {
-    "scrapy.extensions.closespider.CloseSpider": 500,
-}
+# EXTENSIONS = {
+#    'scrapy.extensions.telnet.TelnetConsole': None,
+# }
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 # ITEM_PIPELINES = {
-#    'espn.pipelines.EspnPipeline': 300,
+#    'ncaab.pipelines.NcaabPipeline': 300,
 # }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
