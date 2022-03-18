@@ -4,8 +4,8 @@ name: scrape
 
 # Controls when the workflow will run
 on:
-  schedule:
-    - cron: '0 * * * *'
+#  schedule:
+#    - cron: '0 * * * *'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -42,6 +42,12 @@ jobs:
           export PYTHONPATH=$PYTHONPATH:`pwd`
           cd ncaab
           scrapy crawl bovada
+
+      - name: Run the bovada merger
+        run: |
+          export PYTHONPATH=$PYTHONPATH:`pwd`
+          cd ncaab
+          python scripts/bovada_merge.py
 
       # Add new files in data folder, commit along with other modified files, push
       - name: Commit files

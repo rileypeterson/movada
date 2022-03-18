@@ -1,4 +1,4 @@
-from ncaab.utils.team_names import sanitize_team
+from ncaab.utils.str_sanitizer import sanitize_team, sanitize_odds
 
 
 def test_unicode_removed():
@@ -23,3 +23,14 @@ def test_keep_some_symbols():
     )
     # I think this is fine
     # assert sanitize_team("Augustana (IL) Vikings") == "Augustana (IL) Vikings"
+
+
+def test_odds():
+    assert sanitize_odds("(-110)") == "-110"
+    assert sanitize_odds("-110") == "-110"
+    assert sanitize_odds(" -110 ") == "-110"
+    assert sanitize_odds(" (-110) ") == "-110"
+    assert sanitize_odds(" EVEN ") == "EVEN"
+    assert sanitize_odds("+110") == "+110"
+    assert sanitize_odds("(+110)") == "+110"
+    assert sanitize_odds("") == ""
