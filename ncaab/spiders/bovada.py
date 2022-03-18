@@ -56,6 +56,7 @@ class BovadaSpider(scrapy.Spider):
     @staticmethod
     def parse_game_box(game_box):
         # ONLY WORKS IF ML IS PRESENT
+
         # Game Date and Time
         game_date_elm = "span.period.hidden-xs"
         game_date = game_box.css(f"{game_date_elm}::text").getall()[0]
