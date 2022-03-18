@@ -1,5 +1,0 @@
-Django
-mysqlclient
-scrapy
-pandas
-django-extensions

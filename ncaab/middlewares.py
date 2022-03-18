@@ -4,24 +4,12 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-from scrapy.http import Response, HtmlResponse
-
-# from django.core.exceptions import ObjectDoesNotExist
-#
-# from sports_app.models import Webpage, Sport, League
-
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
 
 
-class CustomHtmlResponse(HtmlResponse):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.cached = False
-
-
-class EspnSpiderMiddleware:
+class NcaabSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
     # passed objects.
@@ -65,12 +53,10 @@ class EspnSpiderMiddleware:
             yield r
 
     def spider_opened(self, spider):
-        spider.logger.info("Spider opened: %s" % spider.name)
-        s, _ = Sport.objects.update_or_create(name="football")
-        l, _ = League.objects.update_or_create(sport_id=s.id, name="nfl")
+        spider.logger.info('Spider opened: %s' % spider.name)
 
 
-class EspnDownloaderMiddleware:
+class NcaabDownloaderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.
@@ -86,19 +72,6 @@ class EspnDownloaderMiddleware:
         # Called for each request that goes through the downloader
         # middleware.
 
-        try:
-            # If in db, just get the copy from there
-            # TODO: Maybe just use a form here
-            # Or maybe you should just store hashes of the url which are < 255
-            wp = Webpage.objects.get(
-                pk=request.url[: Webpage._meta.get_field("url").max_length]
-            )
-            spider.logger.info(f"Cached url: {wp.url} retrieved from db")
-            response = CustomHtmlResponse(wp.url, 200, None, wp.body.encode())
-            response.cached = True
-            return response
-        except ObjectDoesNotExist:
-            pass
         # Must either:
         # - return None: continue processing this request
         # - or return a Response object
@@ -109,13 +82,6 @@ class EspnDownloaderMiddleware:
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
-
-        # Save response body to mysql db
-        # TODO: Should include status and headers at least
-        if not getattr(response, "cached", False):
-            wp = Webpage(url=response.url, body=response.body.decode())
-            wp.save()
-            spider.logger.info(f"Stored url: {response.url} in db")
 
         # Must either;
         # - return a Response object
@@ -134,4 +100,4 @@ class EspnDownloaderMiddleware:
         pass
 
     def spider_opened(self, spider):
-        spider.logger.info("Spider opened: %s" % spider.name)
+        spider.logger.info('Spider opened: %s' % spider.name)
