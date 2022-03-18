@@ -96,3 +96,5 @@ DOWNLOAD_HANDLERS = {
 }
 
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
+
+# PLAYWRIGHT_CONTEXTS = {"ctx": {"locale": "en-US", "timezone_id": "America/New_York"}}
