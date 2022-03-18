@@ -36,5 +36,6 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run the bovada scraper
         run: |
+          export PYTHONPATH=$PYTHONPATH:`pwd`
           cd ncaab
           scrapy crawl bovada
