@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import scrapy
 from scrapy_playwright.page import PageCoroutine
+from ncaab.utils.team_names import sanitize_team
 
 
 def org_df(df):
@@ -64,6 +65,8 @@ class BovadaSpider(scrapy.Spider):
 
         # Team Names
         top_team, bottom_team = game_box.css(".competitor-name>.name::text").getall()
+        top_team = sanitize_team(top_team)
+        bottom_team = sanitize_team(bottom_team)
 
         spread_col, ml_col, total_col = game_box.css("sp-two-way-vertical")
 
