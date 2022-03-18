@@ -65,8 +65,9 @@ home_team_obj, away_team_obj = spider.parse_teams(response)
 
 
 # Thoughts
-1. Github action (which runs every hour) initiates movada pipeline
-2. Goes to bovada and consumes all the upcoming fixtures (including lines and spreads). Uploads to github.
-3. For each team get the data from their previous 7 non-preseason games (recurse) including historical odds. 
-4. Also get the odds data from [here](https://github.com/JeMorriso/PySBR).
-5. Post to dataframe in repo on github. 
+1. ~~Github action (which runs every hour) initiates movada pipeline~~
+2. ~~Goes to bovada and consumes all the upcoming fixtures (including lines and spreads). Uploads to github.~~
+3. Synchronize next events into historical data, once they pass
+4. For each team get the data from their previous 7 non-preseason games (recurse) including historical odds. 
+5. Also get the odds data from [here](https://github.com/JeMorriso/PySBR).
+6. Post to dataframe in repo on github. 

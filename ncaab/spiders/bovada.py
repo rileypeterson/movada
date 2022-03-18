@@ -1,4 +1,6 @@
 import os
+import time
+import traceback
 import pandas as pd
 import numpy as np
 import scrapy
@@ -57,10 +59,16 @@ class BovadaSpider(scrapy.Spider):
     @staticmethod
     def parse_game_box(game_box):
         # ONLY WORKS IF ML IS PRESENT
+
         # Game Date and Time
         game_date_elm = "span.period.hidden-xs"
         game_date = game_box.css(f"{game_date_elm}::text").getall()[0]
         game_time = game_box.css(f"{game_date_elm} > time.clock::text").getall()[0]
+        game_datetime = (
+            pd.to_datetime(game_date + game_time + time.strftime("%z"))
+            .tz_convert("UTC")
+            .strftime("%Y-%m-%d %H:%M:%S")
+        )
 
         # Team Names
         top_team, bottom_team = game_box.css(".competitor-name>.name::text").getall()
@@ -90,6 +98,7 @@ class BovadaSpider(scrapy.Spider):
         )
         top_total_odds, bottom_total_odds = total_col.css(".bet-price::text").extract()
         d = dict(
+            game_datetime=game_datetime,
             game_date=game_date,
             game_time=game_time,
             top_team=top_team,
@@ -112,22 +121,29 @@ class BovadaSpider(scrapy.Spider):
     def parse_bovada(self, response):
         game_boxes = response.css("sp-next-events").css("sp-coupon")
         bovada_list = []
+        scrape_datetime = pd.to_datetime("now", utc=True).round("s")
         for game_box in game_boxes:
             try:
                 bd = self.parse_game_box(game_box)
                 bovada_list.append(bd)
-            except ValueError:
-                pass
+            except (ValueError, IndexError):
+                # TODO: Make these better
+                # Value Error for when there is no ML or missing lines
+                # Index Error when the date says "Second Half"
+                traceback.print_exc()
         bovada_df = pd.DataFrame(data=bovada_list, columns=bovada_list[0].keys())
+        bovada_df["scrape_datetime"] = scrape_datetime.strftime("%Y-%m-%d %H:%M:%S")
         return bovada_df
 
     def parse(self, response):
         bovada_df = self.parse_bovada(response)
         bovada_df["top_final"] = np.nan
         bovada_df["bottom_final"] = np.nan
-        bovada_df = org_df(bovada_df)
+        # We don't want to do this here, later in the processing
+        # bovada_df = org_df(bovada_df)
         cols = [
-            "game_date",
+            "scrape_datetime",
+            "game_datetime",
             "top_team",
             "top_final",
             "bottom_final",
