@@ -46,7 +46,7 @@ jobs:
           git config --local user.name github-actions
           git config --local user.email "actions@github.com"
           git add ncaab/data/*
-          git commit -am "GH ACTION $GITHUB_WORKFLOW $(date)"
+          git diff-index --quiet HEAD || git commit -am "GH ACTION $GITHUB_WORKFLOW $(date)"
           git push origin $GITHUB_REF_NAME
         env:
           REPO_KEY: ${{secrets.GITHUB_TOKEN}}
