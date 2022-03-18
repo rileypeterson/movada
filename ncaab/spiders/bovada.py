@@ -5,7 +5,8 @@ import pandas as pd
 import numpy as np
 import scrapy
 from scrapy_playwright.page import PageCoroutine
-from ncaab.utils.team_names import sanitize_team
+from ncaab.utils.str_sanitizer import sanitize_team, sanitize_odds
+from ncaab.constants import BOVADA_COLUMNS
 
 
 def org_df(df):
@@ -97,6 +98,11 @@ class BovadaSpider(scrapy.Spider):
             .extract()
         )
         top_total_odds, bottom_total_odds = total_col.css(".bet-price::text").extract()
+        if (
+            top_total_label.strip().upper() != "O"
+            or bottom_total_label.strip().upper() != "U"
+        ):
+            raise ValueError("Over under labels are wrong")
         d = dict(
             game_datetime=game_datetime,
             game_date=game_date,
@@ -109,13 +115,21 @@ class BovadaSpider(scrapy.Spider):
             bottom_spread_odds=bottom_spread_odds,
             top_ml_odds=top_ml_odds,
             bottom_ml_odds=bottom_ml_odds,
-            top_total_label=top_total_label,
             top_total=top_total,
-            bottom_total_label=bottom_total_label,
             bottom_total=bottom_total,
             top_total_odds=top_total_odds,
             bottom_total_odds=bottom_total_odds,
         )
+        # Sanitize (-110) --> -110 etc.
+        for k, v in d.items():
+            if k not in {
+                "game_datetime",
+                "game_date",
+                "game_time",
+                "top_team",
+                "bottom_team",
+            }:
+                d[k] = sanitize_odds(v)
         return d
 
     def parse_bovada(self, response):
@@ -141,25 +155,7 @@ class BovadaSpider(scrapy.Spider):
         bovada_df["bottom_final"] = np.nan
         # We don't want to do this here, later in the processing
         # bovada_df = org_df(bovada_df)
-        cols = [
-            "scrape_datetime",
-            "game_datetime",
-            "top_team",
-            "top_final",
-            "bottom_final",
-            "bottom_team",
-            "top_spread",
-            "top_spread_odds",
-            "top_ml_odds",
-            "top_total",
-            "top_total_odds",
-            "bottom_spread",
-            "bottom_spread_odds",
-            "bottom_ml_odds",
-            "bottom_total",
-            "bottom_total_odds",
-        ]
-        bovada_df = bovada_df[cols]
+        bovada_df = bovada_df[BOVADA_COLUMNS]
         output_file = os.path.dirname(__file__)
         output_file = os.path.dirname(output_file)
         output_file = os.path.join(output_file, "data", "bovada", "next_events.csv")
