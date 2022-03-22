@@ -1,3 +1,5 @@
+import os
+
 BOVADA_COLUMNS = [
     "scrape_datetime",
     "game_datetime",
@@ -16,3 +18,4 @@ BOVADA_COLUMNS = [
     "bottom_total",
     "bottom_total_odds",
 ]
+ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
