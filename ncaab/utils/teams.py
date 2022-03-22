@@ -4,17 +4,19 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import yaml
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, urlencode
 from ncaab.constants import ROOT_DIR
 
 
 def retrieve_wiki_url(t):
     print(t)
-    r = requests.get("https://www.google.com/search?q=" + t + " Men's Basketball")
+    q = urlencode({"q": t + " Men's Basketball Wikipedia"})
+    s = f"https://www.google.com/search?{q}"
+    # print(s)
+    r = requests.get(s)
     soup = BeautifulSoup(r.content, "html.parser")
     elm = "a[href*='/url?q=https://en.wikipedia.org']"
-    print([l for l in soup.select(elm) if "Wikipedia" == l.text])
-    href = [l for l in soup.select(elm) if "Wikipedia" == l.text][0]["href"]
+    href = [l["href"] for l in soup.select(elm)][0]
     parseable = urlparse("https://www.google.com" + href)
     wiki_link = parse_qs(parseable.query)["q"][0]
     print(t, wiki_link)
