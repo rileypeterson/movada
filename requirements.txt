@@ -1,5 +1,8 @@
+pyyaml
 scrapy
 scrapy-playwright
 pandas
 numpy
 pytest
+beautifulsoup4
+requests
