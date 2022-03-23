@@ -17,7 +17,6 @@ if __name__ == "__main__":
     past_path = os.path.join(ROOT_DIR, "ncaab/data/sbro/past_events.csv")
     sbro_df = pd.read_csv(sbro_path)
     for i in range(len(sbro_df)):
-        time.sleep(random.random() * 10)
         top_team = sbro_df.loc[i, "top_team"]
         bottom_team = sbro_df.loc[i, "bottom_team"]
         # for tt, ttt in replacements:
