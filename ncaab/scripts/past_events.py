@@ -5,12 +5,13 @@ from ncaab.utils.teams import teams
 import time
 import random
 
-# replacements = [
-#     ("HolyCross", "Holy Cross Crusaders"),
-#     ("StonyBrook", "Stony Brook Seawolves"),
-#     ("NJIT", "NJIT Highlanders"),
-#     ("WiscMilwaukee", "Milwaukee Panthers"),
-# ]
+skips = [
+    "Chaminade",
+    "AlaskaAnchorage",
+    "ConcordiaSt.Paul",
+    "TXPanAmerican",
+    "Texas-PanAmerican",
+]
 
 if __name__ == "__main__":
     sbro_path = os.path.join(ROOT_DIR, "ncaab/data/sbro/ncaab_history_init.csv")
@@ -19,6 +20,12 @@ if __name__ == "__main__":
     for i in range(len(sbro_df)):
         top_team = sbro_df.loc[i, "top_team"]
         bottom_team = sbro_df.loc[i, "bottom_team"]
+        c = False
+        for skip in skips:
+            if top_team == skip or bottom_team == skip:
+                c = True
+        if c:
+            continue
         # for tt, ttt in replacements:
         #     if top_team == tt:
         #         top_team = ttt
