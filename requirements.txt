@@ -6,3 +6,4 @@ numpy
 pytest
 beautifulsoup4
 requests
+openpyxl

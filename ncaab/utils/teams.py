@@ -9,6 +9,8 @@ teams = {
     },
 }
 """
+import pandas as pd
+import numpy as np
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -17,6 +19,11 @@ from ncaab.constants import ROOT_DIR
 import atexit
 import signal
 import pickle
+import time
+import random
+from requests_html import HTMLSession
+
+session = HTMLSession()
 
 
 class Teams(object):
@@ -53,6 +60,7 @@ class Teams(object):
 
 
 def retrieve_wiki_url(t):
+    time.sleep(random.random() * 15)
     print(f"Searching for {t}")
     q = urlencode({"q": t + " Men's Basketball Wikipedia"})
     s = f"https://www.google.com/search?{q}"
@@ -85,14 +93,14 @@ if __name__ == "__main__":
     srcbb_path = os.path.join(ROOT_DIR, "ncaab/data/srcbb_teams.csv")
     df_path = os.path.join(ROOT_DIR, "ncaab/data/bovada/last_events.csv")
 
-    # srcbb_df = pd.read_csv(srcbb_path, index_col=0)
-    # srcbb_df["Slug"] = srcbb_df["Link"].str.replace("/cbb/schools/", "").str[:-1]
-    # srcbb_df["Bovada Name"] = np.nan
-    # df = pd.read_csv(df_path, index_col=0)
+    # retrieve_wiki_url("StThomas")
 
-    # for t, slug in srcbb_df.loc[(srcbb_df["To"] > 2010) & (srcbb_df["From"] <= 2010)][
-    #     ["School", "Slug"]
-    # ].values:
-    #     print(t)
-    #     teams[t]["srcbb_school"] = t
-    #     teams[t]["srcbb_slug"] = slug
+    srcbb_df = pd.read_csv(srcbb_path, index_col=0)
+    srcbb_df["Slug"] = srcbb_df["Link"].str.replace("/cbb/schools/", "").str[:-1]
+    srcbb_df["Bovada Name"] = np.nan
+    df = pd.read_csv(df_path, index_col=0)
+
+    for t, slug in srcbb_df.loc[(srcbb_df["To"] > 2010)][["School", "Slug"]].values:
+        print(teams[t])
+        teams[t]["srcbb_school"] = t
+        teams[t]["srcbb_slug"] = slug
