@@ -15,6 +15,7 @@ import os
 from urllib.parse import urlparse, parse_qs, urlencode
 from ncaab.constants import ROOT_DIR
 import atexit
+import signal
 import pickle
 
 
@@ -76,6 +77,8 @@ teams = Teams(teams)
 
 
 atexit.register(save_teams)
+signal.signal(signal.SIGTERM, save_teams)
+signal.signal(signal.SIGINT, save_teams)
 
 
 if __name__ == "__main__":
