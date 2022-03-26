@@ -6,3 +6,4 @@ __pycache__
 /ncaab/data/sbro/ncaa *
 /venv
 .pytest_cache
+/ncaab/data/events.csv
