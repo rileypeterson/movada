@@ -69,17 +69,30 @@ class SrcbbSpider(scrapy.Spider):
             lambda t, sea: f"https://www.sports-reference.com/cbb/schools/{t}/{sea}-gamelogs.html"
         )
         k = 0
+        tot = len(self.master_df.index.values)
+        # We need to compile a list of these, there's about 5 and we need to remove them
+        outlawed = {"Chaminade"}
         for date, t1, t2 in self.master_df.index.values:
+            if t1 in outlawed or t2 in outlawed:
+                print("Skipping")
+                k += 1
+                continue
+            print(round(k / tot, 2))
             inds = [date, t1, t2]
             if pd.notnull(
                 self.master_df.loc[tuple(inds), "bottom_s_Opp_PF_1"]
             ) and pd.notnull(self.master_df.loc[tuple(inds), "top_s_Opp_PF_1"]):
                 print(f"Skipping {date}, {t1}, {t2}")
+                k += 1
                 continue
             season = pd.to_datetime(date).year + round(
                 pd.to_datetime(date).day_of_year / 365
             )
-            t1_slug = teams[t1]["srcbb_slug"]
+            try:
+                t1_slug = teams[t1]["srcbb_slug"]
+            except KeyError as e:
+                print(t1)
+                raise e
             start_url = mk_url(t1_slug, season)
             yield scrapy.Request(
                 start_url,
@@ -87,7 +100,11 @@ class SrcbbSpider(scrapy.Spider):
                     game_datetime=date, top_team=t1, bottom_team=t2, is_top=True
                 ),
             )
-            t2_slug = teams[t2]["srcbb_slug"]
+            try:
+                t2_slug = teams[t2]["srcbb_slug"]
+            except KeyError as e:
+                print(t2)
+                raise e
             start_url = mk_url(t2_slug, season)
             yield scrapy.Request(
                 start_url,
@@ -95,9 +112,10 @@ class SrcbbSpider(scrapy.Spider):
                     game_datetime=date, top_team=t2, bottom_team=t1, is_top=False
                 ),
             )
-            if k > 500:
-                break
+            # if k > 500:
+            #     break
             k += 1
+            # break
 
     def spider_closed(self, spider):
         print("Spider closed. Saving master_df...")
