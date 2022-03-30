@@ -4,6 +4,7 @@ import os
 from ncaab.constants import ROOT_DIR
 from ncaab.utils.teams import teams
 from scrapy import signals
+from scrapy.crawler import CrawlerProcess
 
 
 def clean_df(df):
@@ -50,10 +51,11 @@ class SrcbbSpider(scrapy.Spider):
 
     name = "srcbb"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, events_path="", save=False, *args, **kwargs):
+        assert events_path, "events_path cannot be empty string"
         super().__init__(*args, **kwargs)
-        # past_events_path = os.path.join(ROOT_DIR, "ncaab/data/sbro/past_events.csv")
-        self.events_path = os.path.join(ROOT_DIR, "ncaab/data/past_events.csv")
+        self.save = save
+        self.events_path = os.path.join(ROOT_DIR, events_path)
         self.master_df = pd.read_csv(
             self.events_path, index_col=0, dtype=str
         ).set_index(["game_datetime", "top_team", "bottom_team"], drop=True)
@@ -124,10 +126,11 @@ class SrcbbSpider(scrapy.Spider):
             # break
 
     def spider_closed(self, spider):
-        print("Spider closed. Saving master_df...")
-        assert len(self.master_df.columns) == 559
-        self.master_df.astype(str).reset_index().to_csv(self.events_path)
-        print("Saved.")
+        if self.save:
+            print("Spider closed. Saving master_df...")
+            assert len(self.master_df.columns) == 559
+            self.master_df.astype(str).reset_index().to_csv(self.events_path)
+            print("Saved.")
 
     def parse(
         self,
@@ -165,3 +168,10 @@ class SrcbbSpider(scrapy.Spider):
             ["game_datetime", "top_team", "bottom_team"], drop=True
         )
         self.master_df.loc[tuple(inds), list(full_df.columns)] = list(full_df.values[0])
+
+
+if __name__ == "__main__":
+    raise NotImplementedError
+    process = CrawlerProcess()
+    process.crawl(SrcbbSpider, events_path="...", save=False)
+    process.start()
