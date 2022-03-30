@@ -53,7 +53,7 @@ class SrcbbSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # past_events_path = os.path.join(ROOT_DIR, "ncaab/data/sbro/past_events.csv")
-        self.events_path = os.path.join(ROOT_DIR, "ncaab/data/events.csv")
+        self.events_path = os.path.join(ROOT_DIR, "ncaab/data/past_events.csv")
         self.master_df = pd.read_csv(
             self.events_path, index_col=0, dtype=str
         ).set_index(["game_datetime", "top_team", "bottom_team"], drop=True)
