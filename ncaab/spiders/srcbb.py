@@ -71,7 +71,13 @@ class SrcbbSpider(scrapy.Spider):
         k = 0
         tot = len(self.master_df.index.values)
         # We need to compile a list of these, there's about 5 and we need to remove them
-        outlawed = {"Chaminade"}
+        outlawed = {
+            "Chaminade",
+            "AlaskaAnchorage",
+            "ConcordiaSt.Paul",
+            "TXPanAmerican",
+            "Texas-PanAmerican",
+        }
         for date, t1, t2 in self.master_df.index.values:
             if t1 in outlawed or t2 in outlawed:
                 print("Skipping")
@@ -114,7 +120,7 @@ class SrcbbSpider(scrapy.Spider):
             )
             # if k > 500:
             #     break
-            k += 1
+            k += 2
             # break
 
     def spider_closed(self, spider):
