@@ -60,6 +60,7 @@ class Teams(object):
 
 
 def retrieve_wiki_url(t):
+    # TODO: Fix me
     time.sleep(random.random() * 15)
     print(f"Searching for {t}")
     q = urlencode({"q": t + " Men's Basketball Wikipedia"})
@@ -67,7 +68,11 @@ def retrieve_wiki_url(t):
     r = requests.get(s)
     soup = BeautifulSoup(r.content, "html.parser")
     elm = "a[href*='/url?q=https://en.wikipedia.org']"
-    href = [l["href"] for l in soup.select(elm)][0]
+    try:
+        href = [l["href"] for l in soup.select(elm)][0]
+    except IndexError as e:
+        print(soup)
+        raise e
     parseable = urlparse("https://www.google.com" + href)
     wiki_link = parse_qs(parseable.query)["q"][0]
     return wiki_link
