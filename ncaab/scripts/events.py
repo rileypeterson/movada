@@ -2,6 +2,9 @@ import os
 import pandas as pd
 from ncaab.constants import ROOT_DIR, BOVADA_COLUMNS
 from ncaab.utils.teams import teams
+from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
+from ncaab.spiders.srcbb import SrcbbSpider
 
 
 def convert_dt_to_pst(s):
@@ -64,11 +67,24 @@ if __name__ == "__main__":
     k = 0
     for top_team, bottom_team in df[["top_team", "bottom_team"]].values:
         print(top_team, bottom_team)
-        # srcbb_top_team = teams[top_team]["srcbb_school"]
-        # df.loc[k, "top_team"] = srcbb_top_team
-        # srcbb_bottom_team = teams[bottom_team]["srcbb_school"]
-        # df.loc[k, "bottom_team"] = srcbb_bottom_team
+        srcbb_top_team = teams[top_team]["srcbb_school"]
+        df.loc[k, "top_team"] = srcbb_top_team
+        srcbb_bottom_team = teams[bottom_team]["srcbb_school"]
+        df.loc[k, "bottom_team"] = srcbb_bottom_team
         k += 1
+
+    process = CrawlerProcess(get_project_settings())
+    process.crawl(
+        SrcbbSpider,
+        input_path=df.set_index([]),
+        output_path="ncaab/data/past_events.csv",
+        save=True,
+    )
+    # When I last ran this:
+    # We skipped: 117.0 games due to data errors.
+
+    # Which is fine by me.
+    process.start()
 
     a = 1
     # path = os.path.join(ROOT_DIR, "ncaab/data/events.csv")

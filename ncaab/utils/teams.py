@@ -41,7 +41,7 @@ class Teams(object):
                 # Recognized search term
                 return self.teams[self.teams[item]["wiki_url"]]
             except KeyError:
-                raise NotImplementedError("Use spider")
+                raise NotImplementedError("Use teams.add(alias, wiki_url)")
                 wiki_url = retrieve_wiki_url(item)
                 try:
                     # New search term
@@ -67,6 +67,11 @@ class Teams(object):
         self.teams[team]["wiki_url"] = correct_wiki
         if team not in self.teams[self.teams[team]["wiki_url"]]["aliases"]:
             self.teams[self.teams[team]["wiki_url"]]["aliases"].append(team)
+
+    def add(self, alias, wiki_url):
+        self.teams[alias] = {"wiki_url": wiki_url}
+        if alias not in self.teams[wiki_url]["aliases"]:
+            self.teams[wiki_url]["aliases"].append(alias)
 
     def clean(self):
         j = 0
@@ -144,6 +149,7 @@ if __name__ == "__main__":
     # teams.fix("TennesseeChat", "Chattanooga Mocs")
     # teams.fix("ETennesseeSt", "East Tennessee State Buccaneers")
     # teams.fix("SouthDakotaSt", "South Dakota State Jackrabbits")
+    # teams.fix("zzzzNDakotaSt", "North Dakota State Bison")
     #
     # teams.remove("Chaminade")
     # teams.remove("AlaskaAnchorage")

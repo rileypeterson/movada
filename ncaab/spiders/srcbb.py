@@ -1,10 +1,12 @@
 import pandas as pd
+import numpy as np
 import scrapy
 import os
-from ncaab.constants import ROOT_DIR
+from ncaab.constants import ROOT_DIR, SRCBB_COLUMNS
 from ncaab.utils.teams import teams
 from scrapy import signals
 from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
 
 
 def clean_df(df):
@@ -50,15 +52,19 @@ class SrcbbSpider(scrapy.Spider):
     """
 
     name = "srcbb"
+    custom_settings = {"CLOSESPIDER_ERRORCOUNT": 1}
 
-    def __init__(self, events_path="", save=False, *args, **kwargs):
-        assert events_path, "events_path cannot be empty string"
+    def __init__(self, input_path="", output_path="", save=False, *args, **kwargs):
+        assert input_path, "input_path cannot be empty string"
+        assert output_path, "output_path cannot be empty string"
         super().__init__(*args, **kwargs)
+        self.skips = 0
         self.save = save
-        self.events_path = os.path.join(ROOT_DIR, events_path)
-        self.master_df = pd.read_csv(
-            self.events_path, index_col=0, dtype=str
-        ).set_index(["game_datetime", "top_team", "bottom_team"], drop=True)
+        self.input_path = os.path.join(ROOT_DIR, input_path)
+        self.output_path = os.path.join(ROOT_DIR, output_path)
+        self.master_df = pd.read_csv(self.input_path, index_col=0, dtype=str).set_index(
+            ["game_datetime", "top_team", "bottom_team"], drop=True
+        )
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -72,6 +78,9 @@ class SrcbbSpider(scrapy.Spider):
         )
         k = 0
         tot = len(self.master_df.index.values)
+        if "bottom_s_Opp_PF_1" not in self.master_df.columns:
+            for col in SRCBB_COLUMNS:
+                self.master_df[col] = np.nan
         # We need to compile a list of these, there's about 5 and we need to remove them
         outlawed = {
             "Chaminade",
@@ -81,8 +90,14 @@ class SrcbbSpider(scrapy.Spider):
             "Texas-PanAmerican",
         }
         for date, t1, t2 in self.master_df.index.values:
-            if t1 in outlawed or t2 in outlawed:
-                print("Skipping")
+            if t1 in outlawed:
+                print(f"Skipping {t1}")
+                self.skips += 1
+                k += 1
+                continue
+            if t2 in outlawed:
+                print(f"Skipping {t2}")
+                self.skips += 1
                 k += 1
                 continue
             print(round(k / tot, 2))
@@ -120,17 +135,20 @@ class SrcbbSpider(scrapy.Spider):
                     game_datetime=date, top_team=t2, bottom_team=t1, is_top=False
                 ),
             )
-            # if k > 500:
+            # if k > 50:
             #     break
             k += 2
             # break
 
     def spider_closed(self, spider):
+        print(f"We skipped: {self.skips} games due to data errors.")
         if self.save:
             print("Spider closed. Saving master_df...")
             assert len(self.master_df.columns) == 559
-            self.master_df.astype(str).reset_index().to_csv(self.events_path)
+            self.master_df.astype(str).reset_index().to_csv(self.output_path)
             print("Saved.")
+        else:
+            print("Didn't save anything.")
 
     def parse(
         self,
@@ -146,7 +164,40 @@ class SrcbbSpider(scrapy.Spider):
             inds = [game_datetime, bottom_team, top_team]
         df = pd.read_html(response.css("table")[0].get())[0]
         df = clean_df(df)
-        # TODO: Validate current score here so you know you have the correct teams...
+        master_scores = self.master_df.loc[tuple(inds)]
+        df_scores = df.loc[pd.to_datetime(game_datetime) == pd.to_datetime(df["Date"])]
+        if len(df_scores) == 0:
+            print(f"No matching srcbb game: {game_datetime}, {top_team}, {bottom_team}")
+            self.skips += 0.5
+            return
+        df_scores = df_scores.iloc[0]
+
+        if is_top:
+            if master_scores["top_final"] != df_scores["Tm"]:
+                self.skips += 0.5
+                print(
+                    f"Top score wrong: {master_scores['top_final']} vs. {df_scores['Tm']}, {inds}, {response.url}"
+                )
+                return
+            if master_scores["bottom_final"] != df_scores["Opp"]:
+                self.skips += 0.5
+                print(
+                    f"Bottom score wrong: {master_scores['bottom_final']} vs. {df_scores['Opp']}, {inds}, {response.url}"
+                )
+                return
+        else:
+            if master_scores["bottom_final"] != df_scores["Tm"]:
+                self.skips += 0.5
+                print(
+                    f"Top score wrong: {master_scores['bottom_final']} vs. {df_scores['Tm']}, {inds}, {response.url}"
+                )
+                return
+            if master_scores["top_final"] != df_scores["Opp"]:
+                self.skips += 0.5
+                print(
+                    f"Bottom score wrong: {master_scores['top_final']} vs. {df_scores['Opp']}, {inds}, {response.url}"
+                )
+                return
         # Limit to last 7 games
         df = df.loc[pd.to_datetime(df["Date"]) < pd.to_datetime(game_datetime)].iloc[
             -games_back:
@@ -172,7 +223,15 @@ class SrcbbSpider(scrapy.Spider):
 
 
 if __name__ == "__main__":
-    raise NotImplementedError
-    process = CrawlerProcess()
-    process.crawl(SrcbbSpider, events_path="...", save=False)
+    process = CrawlerProcess(get_project_settings())
+    process.crawl(
+        SrcbbSpider,
+        input_path="ncaab/data/past_events.csv",
+        output_path="ncaab/data/past_events.csv",
+        save=True,
+    )
+    # When I last ran this:
+    # We skipped: 117.0 games due to data errors.
+
+    # Which is fine by me.
     process.start()
