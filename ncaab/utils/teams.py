@@ -41,6 +41,7 @@ class Teams(object):
                 # Recognized search term
                 return self.teams[self.teams[item]["wiki_url"]]
             except KeyError:
+                raise NotImplementedError("Use spider")
                 wiki_url = retrieve_wiki_url(item)
                 try:
                     # New search term
@@ -50,13 +51,43 @@ class Teams(object):
                         self.teams[wiki_url]["aliases"].append(item)
                     return r
                 except KeyError:
+                    raise ValueError(f"Unrecognized team: {item}")
                     # Completely new team (no srcbb entry)
-                    self.teams[item] = {"wiki_url": wiki_url}
-                    self.teams[wiki_url] = {"aliases": [item]}
-                    return self.__getitem__(item)
+                    # self.teams[item] = {"wiki_url": wiki_url}
+                    # self.teams[wiki_url] = {"aliases": [item]}
+                    # return self.__getitem__(item)
 
     def as_dict(self):
         return self.teams
+
+    def fix(self, team, alias):
+        correct_wiki = self.teams[alias]["wiki_url"]
+        self.remove(team)
+        self.teams[team] = {}
+        self.teams[team]["wiki_url"] = correct_wiki
+        if team not in self.teams[self.teams[team]["wiki_url"]]["aliases"]:
+            self.teams[self.teams[team]["wiki_url"]]["aliases"].append(team)
+
+    def clean(self):
+        j = 0
+        for k, v in self.teams.items():
+            # print(k, v)
+            aliases = v.get("aliases", None)
+            if aliases:
+                print(j, aliases)
+                j += 1
+
+    def remove(self, team):
+        try:
+            print(f"Removing {team}")
+            self.teams[self.teams[team]["wiki_url"]]["aliases"] = [
+                t
+                for t in self.teams[self.teams[team]["wiki_url"]]["aliases"]
+                if t != team
+            ]
+            del self.teams[team]
+        except KeyError:
+            print(f"Already removed {team}")
 
 
 def retrieve_wiki_url(t):
@@ -95,17 +126,45 @@ signal.signal(signal.SIGINT, save_teams)
 
 
 if __name__ == "__main__":
-    srcbb_path = os.path.join(ROOT_DIR, "ncaab/data/srcbb_teams.csv")
-    df_path = os.path.join(ROOT_DIR, "ncaab/data/bovada/last_events.csv")
+    # Note "zzzzNDakotaSt" was linked to teams["Providence Friars"] somehow
+    # teams.fix("AlabamaAM", "Alabama A&M Bulldogs")
+    # teams.fix("ArkansasLR", "ArkansasLittleRock")
+    # teams.fix("CalSantaBarb", "UC Santa Barbara Gauchos")
+    # teams.fix("SoCarolinaSt", "South Carolina State Bulldogs")
+    # teams.fix("FloridaAM", "Florida A&M Rattlers")
+    #
+    # teams.fix("NoIllinois", "Northern Illinois Huskies")
+    # teams.fix("SoIllinois", "Southern Illinois Salukis")
+    # teams.fix("JacksonvilleSt", "Jacksonville State Gamecocks")
+    # teams.fix("MississippiSt", "Mississippi State Bulldogs")
+    # teams.fix("MissouriSt", "Missouri State Bears")
+    # teams.fix("NorthCarolinaAT", "North Carolina A&T Aggies")
+    # teams.fix("N.CarolinaAT", "North Carolina A&T Aggies")
+    # teams.fix("NorthwesternSt", "Northwestern State Demons")
+    # teams.fix("TennesseeChat", "Chattanooga Mocs")
+    # teams.fix("ETennesseeSt", "East Tennessee State Buccaneers")
+    # teams.fix("SouthDakotaSt", "South Dakota State Jackrabbits")
+    #
+    # teams.remove("Chaminade")
+    # teams.remove("AlaskaAnchorage")
+    # teams.remove("ConcordiaSt.Paul")
+    # teams.remove("TXPanAmerican")
+    # teams.remove("Texas-PanAmerican")
 
-    # retrieve_wiki_url("StThomas")
+    teams.clean()
 
-    srcbb_df = pd.read_csv(srcbb_path, index_col=0)
-    srcbb_df["Slug"] = srcbb_df["Link"].str.replace("/cbb/schools/", "").str[:-1]
-    srcbb_df["Bovada Name"] = np.nan
-    df = pd.read_csv(df_path, index_col=0)
-
-    for t, slug in srcbb_df.loc[(srcbb_df["To"] > 2010)][["School", "Slug"]].values:
-        print(teams[t])
-        teams[t]["srcbb_school"] = t
-        teams[t]["srcbb_slug"] = slug
+    # teams.remove("zzzzNDakotaSt")
+    # srcbb_path = os.path.join(ROOT_DIR, "ncaab/data/srcbb_teams.csv")
+    # df_path = os.path.join(ROOT_DIR, "ncaab/data/bovada/last_events.csv")
+    #
+    # # retrieve_wiki_url("StThomas")
+    #
+    # srcbb_df = pd.read_csv(srcbb_path, index_col=0)
+    # srcbb_df["Slug"] = srcbb_df["Link"].str.replace("/cbb/schools/", "").str[:-1]
+    # srcbb_df["Bovada Name"] = np.nan
+    # df = pd.read_csv(df_path, index_col=0)
+    #
+    # for t, slug in srcbb_df.loc[(srcbb_df["To"] > 2010)][["School", "Slug"]].values:
+    #     print(teams[t])
+    #     teams[t]["srcbb_school"] = t
+    #     teams[t]["srcbb_slug"] = slug

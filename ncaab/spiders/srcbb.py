@@ -146,6 +146,7 @@ class SrcbbSpider(scrapy.Spider):
             inds = [game_datetime, bottom_team, top_team]
         df = pd.read_html(response.css("table")[0].get())[0]
         df = clean_df(df)
+        # TODO: Validate current score here so you know you have the correct teams...
         # Limit to last 7 games
         df = df.loc[pd.to_datetime(df["Date"]) < pd.to_datetime(game_datetime)].iloc[
             -games_back:
