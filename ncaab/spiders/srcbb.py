@@ -166,6 +166,7 @@ class SrcbbSpider(scrapy.Spider):
         df = clean_df(df)
         master_scores = self.master_df.loc[tuple(inds)]
         df_scores = df.loc[pd.to_datetime(game_datetime) == pd.to_datetime(df["Date"])]
+        has_scores = True
         if len(df_scores) == 0:
             if pd.to_datetime(game_datetime) >= pd.to_datetime(
                 pd.to_datetime("now", utc=True)
@@ -175,13 +176,17 @@ class SrcbbSpider(scrapy.Spider):
                 print(
                     f"Game hasn't happened yet {game_datetime}, {top_team}, {bottom_team}"
                 )
+                has_scores = False
+            else:
+                print(
+                    f"No matching srcbb game: {game_datetime}, {top_team}, {bottom_team}"
+                )
+                self.skips += 0.5
                 return
-            print(f"No matching srcbb game: {game_datetime}, {top_team}, {bottom_team}")
-            self.skips += 0.5
-            return
-        df_scores = df_scores.iloc[0]
+        if has_scores:
+            df_scores = df_scores.iloc[0]
 
-        if is_top:
+        if is_top and has_scores:
             if pd.isnull(master_scores["top_final"]) or pd.isnull(
                 master_scores["bottom_final"]
             ):
@@ -200,7 +205,7 @@ class SrcbbSpider(scrapy.Spider):
                     f"Bottom score wrong: {master_scores['bottom_final']} vs. {df_scores['Opp']}, {inds}, {response.url}"
                 )
                 return
-        else:
+        elif has_scores:
             if pd.isnull(master_scores["top_final"]) or pd.isnull(
                 master_scores["bottom_final"]
             ):
