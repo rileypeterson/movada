@@ -137,7 +137,7 @@ class SrcbbSpider(scrapy.Spider):
             )
             # if k > 50:
             #     break
-            k += 2
+            k += 1
             # break
 
     def spider_closed(self, spider):
@@ -167,12 +167,27 @@ class SrcbbSpider(scrapy.Spider):
         master_scores = self.master_df.loc[tuple(inds)]
         df_scores = df.loc[pd.to_datetime(game_datetime) == pd.to_datetime(df["Date"])]
         if len(df_scores) == 0:
+            if pd.to_datetime(game_datetime) >= pd.to_datetime(
+                pd.to_datetime("now", utc=True)
+                .tz_convert("America/Los_Angeles")
+                .strftime("%Y-%m-%d")
+            ):
+                print(
+                    f"Game hasn't happened yet {game_datetime}, {top_team}, {bottom_team}"
+                )
+                return
             print(f"No matching srcbb game: {game_datetime}, {top_team}, {bottom_team}")
             self.skips += 0.5
             return
         df_scores = df_scores.iloc[0]
 
         if is_top:
+            if pd.isnull(master_scores["top_final"]) or pd.isnull(
+                master_scores["bottom_final"]
+            ):
+                self.master_df.loc[tuple(inds), "top_final"] = df_scores["Tm"]
+                self.master_df.loc[tuple(inds), "bottom_final"] = df_scores["Opp"]
+                master_scores = self.master_df.loc[tuple(inds)]
             if master_scores["top_final"] != df_scores["Tm"]:
                 self.skips += 0.5
                 print(
@@ -186,6 +201,12 @@ class SrcbbSpider(scrapy.Spider):
                 )
                 return
         else:
+            if pd.isnull(master_scores["top_final"]) or pd.isnull(
+                master_scores["bottom_final"]
+            ):
+                self.master_df.loc[tuple(inds), "top_final"] = df_scores["Opp"]
+                self.master_df.loc[tuple(inds), "bottom_final"] = df_scores["Tm"]
+                master_scores = self.master_df.loc[tuple(inds)]
             if master_scores["bottom_final"] != df_scores["Tm"]:
                 self.skips += 0.5
                 print(
@@ -223,6 +244,7 @@ class SrcbbSpider(scrapy.Spider):
 
 
 if __name__ == "__main__":
+    raise ValueError("Remove me to run.")
     process = CrawlerProcess(get_project_settings())
     process.crawl(
         SrcbbSpider,

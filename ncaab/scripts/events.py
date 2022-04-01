@@ -5,6 +5,7 @@ from ncaab.utils.teams import teams
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from ncaab.spiders.srcbb import SrcbbSpider
+from ncaab.spiders.teams import TeamsSpider
 
 
 def convert_dt_to_pst(s):
@@ -73,17 +74,18 @@ if __name__ == "__main__":
         df.loc[k, "bottom_team"] = srcbb_bottom_team
         k += 1
 
-    process = CrawlerProcess(get_project_settings())
+    path = os.path.join(ROOT_DIR, "ncaab/data/tmp/temp_df.csv")
+    df.to_csv(path)
+    settings = get_project_settings()
+    # TODO: change this in favor of https://github.com/rileypeterson/movada/issues/23
+    settings.set("HTTPCACHE_EXPIRATION_SECS", 86400)
+    process = CrawlerProcess(settings)
     process.crawl(
         SrcbbSpider,
-        input_path=df.set_index([]),
-        output_path="ncaab/data/past_events.csv",
+        input_path="ncaab/data/tmp/temp_df.csv",
+        output_path="ncaab/data/events.csv",
         save=True,
     )
-    # When I last ran this:
-    # We skipped: 117.0 games due to data errors.
-
-    # Which is fine by me.
     process.start()
 
     a = 1
