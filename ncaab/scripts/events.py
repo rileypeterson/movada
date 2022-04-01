@@ -2,6 +2,10 @@ import os
 import pandas as pd
 from ncaab.constants import ROOT_DIR, BOVADA_COLUMNS
 from ncaab.utils.teams import teams
+from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
+from ncaab.spiders.srcbb import SrcbbSpider
+from ncaab.spiders.teams import TeamsSpider
 
 
 def convert_dt_to_pst(s):
@@ -64,11 +68,25 @@ if __name__ == "__main__":
     k = 0
     for top_team, bottom_team in df[["top_team", "bottom_team"]].values:
         print(top_team, bottom_team)
-        # srcbb_top_team = teams[top_team]["srcbb_school"]
-        # df.loc[k, "top_team"] = srcbb_top_team
-        # srcbb_bottom_team = teams[bottom_team]["srcbb_school"]
-        # df.loc[k, "bottom_team"] = srcbb_bottom_team
+        srcbb_top_team = teams[top_team]["srcbb_school"]
+        df.loc[k, "top_team"] = srcbb_top_team
+        srcbb_bottom_team = teams[bottom_team]["srcbb_school"]
+        df.loc[k, "bottom_team"] = srcbb_bottom_team
         k += 1
+
+    path = os.path.join(ROOT_DIR, "ncaab/data/tmp/temp_df.csv")
+    df.to_csv(path)
+    settings = get_project_settings()
+    # TODO: change this in favor of https://github.com/rileypeterson/movada/issues/23
+    settings.set("HTTPCACHE_EXPIRATION_SECS", 86400)
+    process = CrawlerProcess(settings)
+    process.crawl(
+        SrcbbSpider,
+        input_path="ncaab/data/tmp/temp_df.csv",
+        output_path="ncaab/data/events.csv",
+        save=True,
+    )
+    process.start()
 
     a = 1
     # path = os.path.join(ROOT_DIR, "ncaab/data/events.csv")
