@@ -5,7 +5,6 @@ from ncaab.utils.teams import teams
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from ncaab.spiders.srcbb import SrcbbSpider
-from ncaab.spiders.teams import TeamsSpider
 
 
 def convert_dt_to_pst(s):

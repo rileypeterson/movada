@@ -19,6 +19,16 @@ BOVADA_COLUMNS = [
     "bottom_total_odds",
 ]
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
+
+OUTLAWED_TEAMS = {
+    "Chaminade",
+    "AlaskaAnchorage",
+    "ConcordiaSt.Paul",
+    "TXPanAmerican",
+    "Texas-PanAmerican",
+}
+
+
 SRCBB_COLUMNS = [
     "top_s_G_1",
     "top_s_Date_1",
