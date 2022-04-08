@@ -20,4 +20,13 @@ PYTHONPATH="`pwd`:$PYTHONPATH"
 export PYTHONPATH
 ```
 
-## 
+## Git LFS Steps
+```commandline
+git lfs track ncaab/data/dataset.csv
+git lfs track "ncaab/data/cache/prod/*"
+git add .gitattributes
+git add -A
+.
+.
+.
+```
