@@ -9,3 +9,5 @@ __pycache__
 /ncaab/data/odds_with_stats/sbro/past_events.csv
 /ncaab/data/past_events_copy.csv
 ncaab/data/tmp
+ncaab/data/odds/sbro/ncaab_history_init.csv
+ncaab/data/odds/sbro/past_events.csv

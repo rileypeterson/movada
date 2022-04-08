@@ -7,11 +7,15 @@ import glob
 import os
 import pathlib
 import numpy as np
-from ncaab.constants import BOVADA_COLUMNS
+from ncaab.constants import BOVADA_COLUMNS, ROOT_DIR
 
 
 if __name__ == "__main__":
-    dir_path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
+    dir_path = pathlib.Path(
+        os.path.dirname(
+            os.path.join(ROOT_DIR, "ncaab/data/odds/sbro/ncaa basketball 2012-13.xlsx")
+        )
+    )
     pat = os.path.join(dir_path, "ncaa basketball 20??-??.xlsx")
     files = sorted(glob.glob(pat))[::-1]
     dfs = []
@@ -119,5 +123,6 @@ if __name__ == "__main__":
     master_df.rename(columns={"game_date": "game_datetime"}, inplace=True)
     master_df = master_df[BOVADA_COLUMNS]
     master_df.to_csv(
-        os.path.join(os.path.dirname(file), "ncaab_history_init.csv"), index=False
+        os.path.join(ROOT_DIR, "ncaab/data/odds/sbro/ncaab_history_init.csv"),
+        index=False,
     )
