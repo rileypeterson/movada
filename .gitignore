@@ -3,9 +3,11 @@ __pycache__
 */__pycache__
 *.pyc
 *.DS_Store
-/ncaab/data/odds/sbro/ncaa *
 /venv
 .pytest_cache
+/ncaab/data/odds/sbro/ncaa *
 /ncaab/data/odds_with_stats/sbro/past_events.csv
+ncaab/data/odds/sbro/ncaab_history_init.csv
+ncaab/data/odds/sbro/past_events.csv
 ncaab/data/copies
 ncaab/data/cache/dev
