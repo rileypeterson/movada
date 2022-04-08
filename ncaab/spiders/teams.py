@@ -72,7 +72,7 @@ class TeamsSpider(scrapy.Spider):
 
 
 if __name__ == "__main__":
-    last_events_path = os.path.join(ROOT_DIR, "ncaab/data/bovada/last_events.csv")
+    last_events_path = os.path.join(ROOT_DIR, "ncaab/data/odds/bovada/last_events.csv")
     df = pd.read_csv(last_events_path, index_col=0)
     all_teams = sorted(set(df["top_team"]).union(df["bottom_team"]))
     process = CrawlerProcess(get_project_settings())
