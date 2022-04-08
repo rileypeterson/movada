@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from ncaab.constants import ROOT_DIR
 
 
 def gen_idx(df):
@@ -15,15 +16,10 @@ def gen_idx(df):
 
 
 if __name__ == "__main__":
-    data_folder = os.path.dirname(__file__)
-    data_folder = os.path.dirname(data_folder)
-    data_folder = os.path.join(data_folder, "data", "bovada")
-    df_next = pd.read_csv(
-        os.path.join(data_folder, "next_events.csv"), index_col=0, dtype=str
-    )
-    df_last = pd.read_csv(
-        os.path.join(data_folder, "last_events.csv"), index_col=0, dtype=str
-    )
+    next_events_file = os.path.join(ROOT_DIR, "ncaab/data/odds/bovada/next_events.csv")
+    last_events_file = os.path.join(ROOT_DIR, "ncaab/data/odds/bovada/last_events.csv")
+    df_next = pd.read_csv(next_events_file, index_col=0, dtype=str)
+    df_last = pd.read_csv(last_events_file, index_col=0, dtype=str)
 
     # Make an index
     # There's a method to my madness
@@ -50,7 +46,5 @@ if __name__ == "__main__":
         raise ValueError("DataFrame too large!!")
 
     # All dtypes are object, write output to last_events.csv
-    output_file = os.path.dirname(__file__)
-    output_file = os.path.dirname(output_file)
-    output_file = os.path.join(output_file, "data", "bovada", "last_events.csv")
+    output_file = os.path.join(ROOT_DIR, "ncaab/data/odds/bovada/last_events.csv")
     df.to_csv(output_file)
