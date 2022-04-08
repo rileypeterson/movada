@@ -8,6 +8,7 @@ from scrapy import signals
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from pprint import pprint
+import warnings
 
 STDMSG = (
     "%(emoji)s %(progress)s %(success)s:%(reason)s [ %(status)s | %(cached)s ] : "
@@ -149,8 +150,10 @@ class SrcbbSpider(scrapy.Spider):
     def edit_master_df(self):
         if "bottom_s_Opp_PF_1" not in self.master_df.columns:
             # Add on stats columns if not there already
-            for col in SRCBB_COLUMNS:
-                self.master_df[col] = np.nan
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                for col in SRCBB_COLUMNS:
+                    self.master_df[col] = np.nan
 
         # Remove teams that are not within the srcbb system
         outlaw_top = self.master_df.index.get_level_values("top_team").isin(
@@ -339,8 +342,10 @@ class SrcbbSpider(scrapy.Spider):
         srcbb_top_score = srcbb_scores[tm]
         srcbb_bottom_score = srcbb_scores[opp]
         # wrong_score_msg = "Villanova 98 (srcbb) != Villanova 97 (master)"
-        if (not master_top_score or not master_bottom_score) or (
-            pd.isnull(master_top_score) or pd.isnull(master_bottom_score)
+        if (
+            (not master_top_score or not master_bottom_score)
+            or (pd.isnull(master_top_score) or pd.isnull(master_bottom_score))
+            or (master_top_score == "None" or master_bottom_score == "None")
         ):
             # Insert score into mdf row
             self.master_df.loc[tuple(d["inds"]), "top_final"] = srcbb_scores[tm]
