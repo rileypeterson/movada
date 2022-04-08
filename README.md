@@ -21,7 +21,7 @@ export PYTHONPATH
 ```
 
 ## Git LFS Steps
-```commandline
+```
 git lfs track ncaab/data/dataset.csv
 git lfs track "ncaab/data/cache/prod/*"
 git add .gitattributes
@@ -29,4 +29,18 @@ git add -A
 .
 .
 .
+```
+
+## BFG Runner
+This was very sketchy and I don't even think it worked
+```
+brew install bfg
+cd to a brand new directory
+git clone --mirror https://github.com/rileypeterson/movada.git
+# Make a backup
+git clone https://github.com/rileypeterson/movada.git
+bfg --delete-files past_events_sample.csv movada.git
+bfg --delete-files ncaab_history_init.csv movada.git
+bfg --delete-files past_events.csv movada.git
+bfg --delete-files srcbb_teams.csv movada.git
 ```
