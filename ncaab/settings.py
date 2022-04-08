@@ -1,5 +1,5 @@
 import os
-from ncaab.constants import ROOT_DIR
+from ncaab.constants import ROOT_DIR, IS_PROD
 
 # Scrapy settings for ncaab project
 #
@@ -87,6 +87,8 @@ ROBOTSTXT_OBEY = False
 HTTPCACHE_ENABLED = True
 HTTPCACHE_EXPIRATION_SECS = 0
 HTTPCACHE_DIR = os.path.join(ROOT_DIR, "ncaab/data/cache/dev")
+if IS_PROD:
+    HTTPCACHE_DIR = os.path.join(ROOT_DIR, "ncaab/data/cache/prod")
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 HTTPCACHE_STORAGE = "scrapy.extensions.httpcache.FilesystemCacheStorage"
 HTTPCACHE_GZIP = True

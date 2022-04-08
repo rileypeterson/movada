@@ -19,7 +19,9 @@ BOVADA_COLUMNS = [
     "bottom_total_odds",
 ]
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
-
+IS_PROD = True
+if ROOT_DIR.startswith("/Users/riley"):
+    IS_PROD = False
 OUTLAWED_TEAMS = {
     "Chaminade",
     "AlaskaAnchorage",
