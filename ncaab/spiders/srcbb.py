@@ -9,8 +9,6 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from pprint import pprint
 
-CRAWLEDMSG = "Crawled (%(status)s) %(request)s%(request_flags)s (referer: %(referer)s)%(response_flags)s"
-
 STDMSG = (
     "%(emoji)s %(progress)s %(success)s:%(reason)s [ %(status)s | %(cached)s ] : "
     "%(game_datetime)s - %(top_team)s vs. %(bottom_team)s ; %(request)s"
@@ -64,7 +62,11 @@ class SrcbbSpider(scrapy.Spider):
 
     name = "srcbb"
     # If there is any error immediately close the spider
-    custom_settings = {"CLOSESPIDER_ERRORCOUNT": 1, "LOG_LEVEL": "INFO"}
+    custom_settings = {
+        "CLOSESPIDER_ERRORCOUNT": 1,
+        "LOG_LEVEL": "INFO",
+        "HTTPCACHE_POLICY": "policies.DataPolicy",
+    }
 
     def __init__(
         self,
@@ -337,10 +339,14 @@ class SrcbbSpider(scrapy.Spider):
         srcbb_top_score = srcbb_scores[tm]
         srcbb_bottom_score = srcbb_scores[opp]
         # wrong_score_msg = "Villanova 98 (srcbb) != Villanova 97 (master)"
-        if not master_top_score or not master_bottom_score:
+        if (not master_top_score or not master_bottom_score) or (
+            pd.isnull(master_top_score) or pd.isnull(master_bottom_score)
+        ):
             # Insert score into mdf row
             self.master_df.loc[tuple(d["inds"]), "top_final"] = srcbb_scores[tm]
             self.master_df.loc[tuple(d["inds"]), "bottom_final"] = srcbb_scores[opp]
+            master_top_score = self.master_df.loc[tuple(d["inds"]), "top_final"]
+            master_bottom_score = self.master_df.loc[tuple(d["inds"]), "bottom_final"]
         if master_top_score != srcbb_top_score:
             return (
                 False,
