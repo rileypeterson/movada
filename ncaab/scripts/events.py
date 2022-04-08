@@ -83,7 +83,7 @@ if __name__ == "__main__":
         SrcbbSpider,
         input_path="ncaab/data/tmp/temp_df.csv",
         output_path="ncaab/data/events.csv",
-        save=True,
+        save=False,
     )
     process.start()
 
