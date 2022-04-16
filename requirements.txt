@@ -7,3 +7,9 @@ pytest
 beautifulsoup4
 requests
 openpyxl
+bsuite
+dm-acme
+tensorflow
+tensorflow-probability
+dm-sonnet
+tqdm
