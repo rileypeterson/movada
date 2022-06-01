@@ -97,7 +97,8 @@ DUPEFILTER_CLASS = "scrapy.dupefilters.BaseDupeFilter"
 
 
 DOWNLOAD_HANDLERS = {
-    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    # Starts two browsers which is kind of annoying... I think everything is gonna be https
+    # "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
     "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
 }
 

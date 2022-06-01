@@ -21,9 +21,6 @@ import signal
 import pickle
 import time
 import random
-from requests_html import HTMLSession
-
-session = HTMLSession()
 
 
 class Teams(object):

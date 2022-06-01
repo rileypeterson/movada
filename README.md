@@ -14,6 +14,10 @@ Compile publicly available sports data.
 * [x] Synchronize next events into historical data, once they pass. [Uploads to Github](https://github.com/rileypeterson/movada/blob/main/ncaab/data/bovada/last_events.csv).
 * [x] For each team get the stats from their previous 7 non-preseason games (recurse) including historical odds. 
 
+# Questions
+* Given a bet, what is the probability of it succeeding?
+* What bets should you make on a given day to yield the highest outcome?
+
 # Set PYTHONPATH (run before running `pytest`)
 ```commandline
 PYTHONPATH="`pwd`:$PYTHONPATH"
