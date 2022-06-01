@@ -4,6 +4,9 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 import os
 import traceback
+import zmq
+import asyncio
+
 
 os.environ["PWDEBUG"] = "0"
 
@@ -13,7 +16,7 @@ class BovonitorSpider(scrapy.Spider):
 
     custom_settings = {
         "HTTPCACHE_ENABLED": False,
-        "PLAYWRIGHT_LAUNCH_OPTIONS": {"headless": False},
+        "PLAYWRIGHT_LAUNCH_OPTIONS": {"headless": True},
         "PLAYWRIGHT_ABORT_REQUEST": lambda req: req.resource_type in {"image"}
         or req.url.endswith(".gif"),
     }
@@ -68,7 +71,7 @@ class BovonitorSpider(scrapy.Spider):
                 # print(traceback.format_exc())
                 break
 
-    async def fetch_data(self, page):
+    async def read_data(self, page):
         urls = await page.eval_on_selector_all(
             "sp-multi-markets a.game-view-cta",
             "elements => elements.map(element => element.href)",
@@ -85,31 +88,27 @@ class BovonitorSpider(scrapy.Spider):
 
         await self.open_plus_boxes(page)
 
-        data = self.fetch_data(page)
+        data = await self.read_data(page)
 
-        for _ in range(100000000):
-            pass
+        context = zmq.Context()
+        socket = context.socket(zmq.PUB)
+        socket.bind("tcp://*:5556")
+        i = 0
+        while True:
+            print(i)
+            data_new = await self.read_data(page)
+            for k_new, v_new in data_new.items():
+                if k_new not in data or v_new != data[k_new]:
+                    socket.send_json(data_new[k_new])
+            data = data_new
+            await asyncio.sleep(0.1)
+            i += 1
 
-        a = 1
-        p = page.locator("sp-multi-markets")
-        cnt = await page.locator("sp-multi-markets").count()
-
-        # await page.eval_on_selector_all("sp-multi-markets a", "elements => elements.map(element => element.href)")
-
-        a = 1
-        for i in range(cnt):
-            l = page.locator("sp-multi-markets").nth(i)
-            d = await self.parse_sp_multi_market(l)
-            print(d)
-
+        # Other stuff
         # await elm.get_attribute("class")
 
         # await (await (await page.locator("sp-multi-markets").nth(3).element_handle()).wait_for_selector(
         #     "* > .price-increased", timeout=5000)).inner_text()
-
-        # l = page.locator("sp-multi-markets").nth(0)
-        # await page.locator("sp-multi-markets > section").all_inner_texts()
-        # await page.locator("sp-multi-markets > section").all_text_contents()
 
 
 if __name__ == "__main__":
