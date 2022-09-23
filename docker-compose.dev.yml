@@ -1,0 +1,72 @@
+version: "3.9"
+services:
+  db:
+    env_file:
+      - ./config/.dev.env
+    image: postgres
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENV=dev
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  web:
+    env_file:
+      - ./config/.dev.env
+    build: .
+    entrypoint: ["sh", "scripts/dev.entrypoint.sh"]
+    volumes:
+      - .:/pihub
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ENV=dev
+    depends_on:
+      - db
+      - scrapyd
+  nginx:
+    image: nginx:1.23-alpine
+    restart: unless-stopped
+    volumes:
+      - ./data/nginx/ddns:/etc/nginx/ddns
+  ofelia:
+    image: mcuadros/ofelia:latest
+    depends_on:
+      - nginx
+      - tasks
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./tasks/ofelia-config.ini:/etc/ofelia/config.ini
+  tasks:
+    build: ./tasks
+    tty: true
+    volumes:
+      - ./data/nginx/ddns:/tasks/ddns
+      - ./tasks:/tasks
+    labels:
+      ofelia.enabled: "true"
+  scrapyd:
+    restart: unless-stopped
+    env_file:
+      - ./config/.dev.env
+    build:
+      context: "./scrapers"
+    command: sh -c "cd /pihub/scrapers && scrapyd"
+    volumes:
+      - .:/pihub
+    expose:
+      - "6800"
+    environment:
+      - ENV=dev
+    tty: true
+    dns:
+      - 8.8.8.8
+    depends_on:
+      - db
+volumes:
+  pgdata:

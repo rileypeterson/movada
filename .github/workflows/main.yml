@@ -1,63 +1,63 @@
-# This is a basic workflow to help you get started with Actions
-
-name: scrape
-
-# Controls when the workflow will run
-on:
-#  # Run every hour on the hour
-#  schedule:
-#    - cron: '0 * * * *'
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  # This workflow contains a single job called "build"
-  autoscrape:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v3
-        with:
-          python-version: '3.8'
-      - uses: szenius/set-timezone@v1.0
-        with:
-          timezoneLinux: "America/Los_Angeles"
-
-      # Runs a single command using the runners shell
-      - name: Install packages
-        run: pip install -r requirements.txt
-
-      - name: Playwright install
-        run: playwright install
-
-      # Runs a set of commands using the runners shell
-      - name: Run the bovada scraper
-        run: |
-          export PYTHONPATH=$PYTHONPATH:`pwd`
-          cd ncaab
-          scrapy crawl bovada
-
-      - name: Run the bovada merger
-        run: |
-          export PYTHONPATH=$PYTHONPATH:`pwd`
-          cd ncaab
-          python scripts/bovada_merge.py
-
-      # Add new files in data folder, commit along with other modified files, push
-      - name: Commit files
-        run: |
-          git config --local user.name github-actions
-          git config --local user.email "actions@github.com"
-          git add ncaab/data/*
-          git diff-index --quiet HEAD || git commit -am "GH ACTION $GITHUB_WORKFLOW $(date)"
-          git push origin $GITHUB_REF_NAME
-        env:
-          REPO_KEY: ${{secrets.GITHUB_TOKEN}}
-          username: github-actions
+## This is a basic workflow to help you get started with Actions
+#
+#name: scrape
+#
+## Controls when the workflow will run
+#on:
+##  # Run every hour on the hour
+##  schedule:
+##    - cron: '0 * * * *'
+#
+#  # Allows you to run this workflow manually from the Actions tab
+#  workflow_dispatch:
+#
+#
+## A workflow run is made up of one or more jobs that can run sequentially or in parallel
+#jobs:
+#  # This workflow contains a single job called "build"
+#  autoscrape:
+#    # The type of runner that the job will run on
+#    runs-on: ubuntu-latest
+#
+#    # Steps represent a sequence of tasks that will be executed as part of the job
+#    steps:
+#      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+#      - uses: actions/checkout@v2
+#      - uses: actions/setup-python@v3
+#        with:
+#          python-version: '3.8'
+#      - uses: szenius/set-timezone@v1.0
+#        with:
+#          timezoneLinux: "America/Los_Angeles"
+#
+#      # Runs a single command using the runners shell
+#      - name: Install packages
+#        run: pip install -r requirements.txt
+#
+#      - name: Playwright install
+#        run: playwright install
+#
+#      # Runs a set of commands using the runners shell
+#      - name: Run the bovada scraper
+#        run: |
+#          export PYTHONPATH=$PYTHONPATH:`pwd`
+#          cd ncaab
+#          scrapy crawl bovada
+#
+#      - name: Run the bovada merger
+#        run: |
+#          export PYTHONPATH=$PYTHONPATH:`pwd`
+#          cd ncaab
+#          python scripts/bovada_merge.py
+#
+#      # Add new files in data folder, commit along with other modified files, push
+#      - name: Commit files
+#        run: |
+#          git config --local user.name github-actions
+#          git config --local user.email "actions@github.com"
+#          git add ncaab/data/*
+#          git diff-index --quiet HEAD || git commit -am "GH ACTION $GITHUB_WORKFLOW $(date)"
+#          git push origin $GITHUB_REF_NAME
+#        env:
+#          REPO_KEY: ${{secrets.GITHUB_TOKEN}}
+#          username: github-actions

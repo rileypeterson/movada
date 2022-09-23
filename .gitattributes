@@ -1,2 +1,0 @@
-ncaab/data/dataset.csv filter=lfs diff=lfs merge=lfs -text
-ncaab/data/cache/prod/* filter=lfs diff=lfs merge=lfs -text
